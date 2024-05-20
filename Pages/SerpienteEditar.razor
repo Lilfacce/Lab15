@@ -1,0 +1,72 @@
+﻿@page "/serpiente-editar/{veneno}"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Serpiente</h3>
+
+<EditForm Model="@serpiente" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Nombre">Nombre de la especie</label>
+        <InputText id="Nombre" @bind-Value="serpiente.Nombre" class="form-control" />
+        <ValidationMessage For="() => serpiente.Nombre" />
+    </div>
+    <div class="form-group">
+        <label for="Especie">Especie</label>
+        <InputText id="Especie" @bind-Value="serpiente.Especie" class="form-control" />
+        <ValidationMessage For="() => serpiente.Especie" />
+    </div>
+    <div class="form-group">
+        <label for="Alimento">Tipo de Alimentacion</label>
+        <InputText id="Alimento" @bind-Value="serpiente.Alimento" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="T_Vida">Tiempo de Vida</label>
+        <InputText id="T_Vida" @bind-Value="serpiente.T_Vida" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Veneno">Es venenosa o no</label>
+        <InputText id="Veneno" @bind-Value="serpiente.Veneno" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Longitud">Longitud Maxima</label>
+        <InputText id="Longitud" @bind-Value="serpiente.Longitud" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public string veneno { get; set; }
+
+    private Serpientes serpiente = new Serpientes();
+    List<Serpientes> serpientes = new List<Serpientes>();
+
+
+    protected async Task Guardar()
+    {
+        await localStorage.SetItemAsync("serpientes", serpientes);
+
+        //Al finalizar de guardar regresamos al formulario original
+        NavigationManager.NavigateTo("/serpiente-crear");
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {   //Cargar todos los libros guardados
+        serpientes = await localStorage.GetItemAsync<List<Serpientes>>("serpientes");
+
+
+        if (serpiente == null)
+            serpientes = new List<Serpientes>();
+
+        serpiente = serpientes.Find(c => c.Veneno == veneno);
+    }
+
+}

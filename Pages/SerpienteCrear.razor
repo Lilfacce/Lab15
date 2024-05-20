@@ -1,0 +1,112 @@
+﻿@page "/Serpiente-crear"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Serpiente</h3>
+
+<EditForm Model="@serpiente" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Nombre">Nombre de la especie</label>
+        <InputText id="Nombre" @bind-Value="serpiente.Nombre" class="form-control" />
+        <ValidationMessage For="() => serpiente.Nombre" />
+    </div>
+    <div class="form-group">
+        <label for="Especie">Especie</label>
+        <InputText id="Especie" @bind-Value="serpiente.Especie" class="form-control" />
+        <ValidationMessage For="() => serpiente.Especie" />
+    </div>
+    <div class="form-group">
+        <label for="Alimento">Tipo de Alimentacion</label>
+        <InputText id="Alimento" @bind-Value="serpiente.Alimento" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="T_Vida">Tiempo de Vida</label>
+        <InputText id="T_Vida" @bind-Value="serpiente.T_Vida" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Veneno">Es venenosa o no</label>
+        <InputText id="Veneno" @bind-Value="serpiente.Veneno" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Longitud">Longitud Maxima</label>
+        <InputText id="Longitud" @bind-Value="serpiente.Longitud" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</EditForm>
+
+@if (serpientes != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Especie</th>
+                <th>Alimento</th>
+                <th>T_Vida</th>
+                <th>Veneno</th>
+                <th>Longitud</th>
+                <th>Eliminar</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var serpiente in serpientes)
+            {
+                <tr>
+                    <td>@serpiente.Nombre</td>
+                    <td>@serpiente.Especie</td>
+                    <td>@serpiente.Alimento</td>
+                    <td>@serpiente.T_Vida</td>
+                    <td>@serpiente.Veneno</td>
+                    <td>@serpiente.Longitud</td>
+                    <td>
+                        <button class="btn btn-danger"
+                                @onclick="@(() => BorrarSerpiente(serpiente.Veneno))">
+                            Eliminar
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/serpiente-editar/{serpiente.Veneno}"))">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Serpientes serpiente = new Serpientes();
+    List<Serpientes> serpientes = new List<Serpientes>();
+
+
+    protected async Task Guardar()
+    {
+        serpientes.Add(serpiente);
+
+        await localStorage.SetItemAsync("serpientes", serpientes);
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        serpientes = await localStorage.GetItemAsync<List<Serpientes>>("serpientes");
+        if (serpientes == null)
+            serpientes = new List<Serpientes>();
+    }
+
+    protected async Task BorrarSerpiente(string Veneno)
+    {
+        serpientes.Remove(serpientes.First(c => c.Veneno == Veneno));
+        await localStorage.SetItemAsync("serpientes", serpientes);
+
+    }
+}
